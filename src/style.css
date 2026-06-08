@@ -1,0 +1,448 @@
+:root {
+  --bg: #1e1e2f;
+  --card-bg: rgba(20, 20, 30, 0.75);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0b0;
+  --btn-bg: #2d2d3f;
+  --btn-hover-bg: #3d3d5c;
+  --accent: #8b5cf6; /* фиолетовый */
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  overflow-x: hidden;
+  position: relative;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg);
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
+body button {
+  box-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.2);
+  color: #fff;
+  background-color: #000;
+}
+body button:hover {
+  background-color: #fff;
+  color: #000;
+}
+.card.is-break {
+  box-shadow: 0 0 20px rgba(72, 199, 142, 0.8);
+  animation: none;
+}
+.card.is-long-break {
+  box-shadow: 0 0 20px rgba(97, 205, 241, 0.8);
+  animation: none;
+}
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.main {
+  margin-top: 100px;
+}
+.card-wrapper {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0px;
+  perspective: 900px;
+}
+.card {
+  width: 500px;
+  min-height: 450px;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(108, 99, 255, 0.3);
+  transition:
+    transform 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+  transform-style: preserve-3d;
+  animation: pulse-glow 2s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from {
+    box-shadow: 0 0 15px rgba(138, 92, 246, 0.1);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(76, 0, 255, 0.7);
+  }
+}
+.card-title {
+  font-size: 30px;
+  margin-top: 60px;
+  text-align: center;
+  text-transform: uppercase;
+  transition: 0.3s all;
+}
+.card-title:hover {
+  transform: scale(1.15);
+}
+.time {
+  font-size: 70px;
+  padding-bottom: 30px;
+  transition: none;
+}
+.button {
+  padding: 20px 35px;
+  border-radius: 8px;
+  border: none;
+  color: var(--text-primary);
+  background-color: var(--btn-bg);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  font-size: 20px;
+}
+button:hover {
+  background-color: var(--btn-hover-bg);
+  color: #fff;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+button:active {
+  transform: scale(0.7);
+}
+#stop {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+.modal-btn {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.modal {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: fadeInUpModal 0.3s ease forwards;
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  animation: fadeInBg 0.3s ease forwards;
+}
+
+@keyframes fadeInBg {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+  }
+  to {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+@keyframes fadeInUpModal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.exit-btn {
+  position: absolute;
+  top: 5%;
+  right: 10%;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.modal-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 400px;
+  min-height: 300px;
+  background-color: var(--card-bg);
+  border-radius: 20px;
+  padding: 50px 60px;
+}
+.modal-title {
+  text-align: center;
+  font-size: 25px;
+  text-transform: uppercase;
+}
+.modal-wrapper input {
+  width: 100%;
+  padding: 15px 15px;
+  border-radius: 10px;
+  outline: none;
+  border: none;
+  transition: 0.3s all;
+  margin-bottom: 5px;
+}
+.modal-wrapper input:focus {
+  background-color: #000000;
+  transform: scale(1.05);
+  color: white;
+}
+.modal-wrapper input:focus::placeholder {
+  color: #fff;
+  opacity: 1;
+}
+.submit {
+  margin-top: 10px;
+  font-size: 14px;
+}
+.submit:hover {
+  transform: scale(1.05);
+}
+
+.skip {
+  margin-top: 10px;
+}
+
+.theme-btn {
+  position: absolute;
+  top: 0;
+  left: 2%;
+}
+
+.section {
+  padding: 80px 0;
+}
+.how-it-works h2,
+.advantages h2,
+.testimonials h2 {
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 40px;
+  font-size: 2rem;
+}
+.steps,
+.cards,
+.reviews {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.step,
+.advantage-card,
+.review-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 30px 20px;
+  text-align: center;
+  max-width: 250px;
+  color: var(--text-primary);
+}
+.step-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 15px;
+}
+/* Текст отзыва */
+.review-text {
+  font-style: italic;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.5;
+  position: relative;
+}
+
+/* Блок автора */
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  text-align: left;
+}
+
+/* Аватарка */
+.review-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 10px rgba(138, 92, 246, 0.4);
+  font-size: 0; /* убираем размер иконки, если используется img */
+  display: block;
+  margin-bottom: 0; /* переопределяем общий отступ */
+}
+
+/* Имя и роль */
+.review-author strong {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.review-author span {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* Заголовки и текст в карточках преимуществ и шагов */
+.advantage-card h3,
+.step h3 {
+  margin: 15px 0 10px;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+.advantage-card p,
+.step p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+/* Футер */
+.footer {
+  text-align: center;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--card-border);
+  padding: 30px 0;
+  margin-top: 40px;
+}
+
+.decor-img {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 20px rgba(76, 0, 255, 0.5));
+  will-change: transform;
+  transition: transform 0.2s ease-out;
+}
+
+.decor-img--brain {
+  left: 50px;
+  width: 200px;
+  opacity: 0.9;
+}
+
+.decor-img--bulb {
+  right: 40px;
+  width: 250px;
+  opacity: 0.85;
+}
+.decor-img--time {
+  top: 100px;
+  right: 60px;
+  width: 240px;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 18px rgba(76, 0, 255, 0.6));
+}
+
+.decor-img--saturn {
+  bottom: 40px;
+  left: 10px;
+  width: 250px;
+  opacity: 0.7;
+  filter: drop-shadow(0 0 25px rgba(76, 0, 255, 0.5));
+}
+
+/* Контейнер для лейбла и инпута */
+.modal-input-group {
+  width: 100%;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* Стили для лейбла */
+.modal-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Стили для числовых инпутов */
+.modal-input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  outline: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Фокус на инпуте */
+.modal-input-group input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(138, 92, 246, 0.3);
+}
+
+.chart-container {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 30px 20px 20px;
+  margin: 40px auto 0;
+  max-width: 700px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.chart-title {
+  text-align: center;
+  color: var(--text-primary);
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 576px) {
+  .main {
+    margin-top: 50px;
+  }
+  .card-wrapper {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+  }
+  .card button {
+    margin-bottom: 10px;
+  }
+  .modal-btn {
+    margin-top: 60px;
+  }
+  #stop {
+    margin-right: 0;
+    margin-left: 0;
+  }
+  .chart-container {
+    padding: 20px 15px;
+  }
+  .chart-title {
+    font-size: 1.2rem;
+  }
+}
