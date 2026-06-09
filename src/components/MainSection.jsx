@@ -25,7 +25,7 @@ function MainSection({
   // === Функции как в оригинале ===
   function updateTime(secs) {
     setTimeLeft(secs);
-    // Можно обновлять title страницы через document.title, если нужно
+    document.title = `${formatTime(secs)} — Pomodoro`;
   }
 
   function saveState() {
