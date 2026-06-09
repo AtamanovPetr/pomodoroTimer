@@ -1,6 +1,6 @@
 import "./style.css";
 import HowItWorks from "./components/HowItWorks";
-import MainSection from "./components/mainSection";
+import MainSection from "./components/MainSection";
 import Advantages from "./components/Advantages";
 import Feedback from "./components/Feedback";
 import Footer from "./components/Footer";
