@@ -6,171 +6,251 @@ function MainSection({
   longBreakTime,
   onOpenSettings,
   onPomodoroComplete,
+  settingsVersion,
 }) {
+  // Только для отображения на экране
   const [timeLeft, setTimeLeft] = useState(workTime);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isBreak, setIsBreak] = useState(false);
-  const [tomatoCount, setTomatoCount] = useState(0);
-  const [duration, setDuration] = useState(workTime);
-  const [modeClass, setModeClass] = useState("");
-  const [textContent, setTextContent] = useState("Начнём?");
-  const [endTime, setEndTime] = useState(null);
+
+  // Все рабочие переменные как refs (не вызывают ререндер)
+  const timerId = useRef(null);
+  const endTime = useRef(null);
+  const duration = useRef(workTime);
+  const isBreak = useRef(false);
+  const isRunning = useRef(false);
+  const timeOutId = useRef(null);
+  const tomatoCount = useRef(0);
+  const pausedTimeLeft = useRef(null);
   const pomodoroCountedRef = useRef(false);
-  useEffect(() => {
-    setTimeLeft(workTime);
-    setDuration(workTime);
-    setIsBreak(false);
-    setTomatoCount(0);
-    setModeClass("");
-    setTextContent("Начнём?");
-    setIsRunning(false);
-    setEndTime(null);
-    pomodoroCountedRef.current = false;
-  }, [workTime, breakTime, longBreakTime]);
+
+  // === Функции как в оригинале ===
+  function updateTime(secs) {
+    setTimeLeft(secs);
+    // Можно обновлять title страницы через document.title, если нужно
+  }
+
+  function saveState() {
+    const state = {
+      endTime: isRunning.current ? endTime.current : null,
+      isBreak: isBreak.current,
+      isRunning: isRunning.current,
+      duration: duration.current,
+      tomatoCount: tomatoCount.current,
+      timeLeft: timeLeft, // текущее отображаемое значение
+    };
+    localStorage.setItem("pomodoro", JSON.stringify(state));
+  }
+
+  function restoreState() {
+    const saved = localStorage.getItem("pomodoro");
+    if (!saved) {
+      updateTime(workTime);
+      return;
+    }
+
+    const state = JSON.parse(saved);
+    endTime.current = state.endTime;
+    isBreak.current = state.isBreak;
+    isRunning.current = state.isRunning;
+    duration.current = state.duration;
+    tomatoCount.current = state.tomatoCount;
+
+    if (isRunning.current && endTime.current > Date.now()) {
+      const remainingSeconds = Math.floor(
+        (endTime.current - Date.now()) / 1000,
+      );
+      updateTime(remainingSeconds);
+      runTimer();
+    } else if (
+      isRunning.current &&
+      endTime.current !== null &&
+      endTime.current <= Date.now()
+    ) {
+      // Время вышло, пока страница была закрыта
+      if (!pomodoroCountedRef.current) {
+        onPomodoroComplete();
+        pomodoroCountedRef.current = true;
+      }
+      switchMode();
+      saveState();
+    } else {
+      updateTime(state.timeLeft);
+    }
+
+    updateInterfaceClasses();
+  }
+
+  function updateInterfaceClasses() {
+    // Обновляем классы и текст в зависимости от isBreak и tomatoCount
+    const cardLabel = document.getElementById("card-label");
+    if (cardLabel) {
+      if (isBreak.current) {
+        if (tomatoCount.current < 3) {
+          cardLabel.textContent = "Пора сделать перерыв!";
+          document.body.classList.add("is-break");
+        } else {
+          cardLabel.textContent = "Пора сделать длинный перерыв!";
+          document.body.classList.add("is-long-break");
+        }
+      } else {
+        cardLabel.textContent = "Пора за работу!";
+        document.body.classList.remove("is-break", "is-long-break");
+      }
+    }
+  }
 
   function switchMode() {
-    const currentIsBreak = isBreak;
-    const newIsBreak = !currentIsBreak;
-    setIsBreak(newIsBreak);
-    if (newIsBreak) {
-      const newTomatoCount = tomatoCount + 1;
-      setTomatoCount(newTomatoCount);
-      if (newTomatoCount < 3) {
-        setDuration(breakTime);
-        setTimeLeft(breakTime);
-        setModeClass("is-break");
+    isBreak.current = !isBreak.current;
+    if (isBreak.current) {
+      tomatoCount.current++;
+      if (tomatoCount.current < 3) {
+        duration.current = breakTime;
+        updateTime(breakTime);
+        document.body.classList.remove("is-break", "is-long-break");
+        document.body.classList.add("is-break");
+        // Обновим текст (можно через состояние или напрямую)
         setTextContent("Пора сделать перерыв!");
+        setModeClass("is-break");
       } else {
-        setDuration(longBreakTime);
-        setTimeLeft(longBreakTime);
-        setTomatoCount(0);
-        setModeClass("is-long-break");
+        duration.current = longBreakTime;
+        updateTime(longBreakTime);
+        tomatoCount.current = 0;
+        document.body.classList.remove("is-break", "is-long-break");
+        document.body.classList.add("is-long-break");
         setTextContent("Пора сделать длинный перерыв!");
+        setModeClass("is-long-break");
       }
     } else {
       pomodoroCountedRef.current = false;
-      setDuration(workTime);
-      setTimeLeft(workTime);
-      setModeClass("");
+      duration.current = workTime;
+      updateTime(workTime);
+      document.body.classList.remove("is-break", "is-long-break");
       setTextContent("Пора за работу!");
+      setModeClass("");
     }
-    setEndTime(null);
+    endTime.current = null;
+    isRunning.current = false;
+    saveState();
   }
 
-  function formatTime(secs) {
-    const minutes = Math.floor(secs / 60);
-    const seconds = secs % 60;
-    return `${minutes}:${seconds < 10 ? `0` + seconds : seconds}`;
-  }
-  function handleStart() {
-    pomodoroCountedRef.current = false;
-    setEndTime(Date.now() + duration * 1000);
-    setIsRunning(true);
-  }
-  function handleStop() {
-    if (isRunning) {
-      setEndTime(Date.now() + duration * 1000);
-    }
-    setIsRunning(false);
-  }
-  function handleReset() {
-    pomodoroCountedRef.current = false;
-    setIsRunning(false);
-    setTimeLeft(workTime);
-    setDuration(workTime);
-    setIsBreak(false);
-    setTomatoCount(0);
-    setModeClass("");
-    setTextContent("Начнём?");
-    setEndTime(null);
-  }
-  function handleSkip() {
-    if (isRunning) {
-      setIsRunning(false);
-      switchMode();
-    } else {
-      switchMode();
-    }
-    setEndTime(null);
-  }
-  useEffect(() => {
-    if (!isRunning) {
-      return;
-    }
-    const id = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 0) {
+  function runTimer() {
+    if (timerId.current !== null) return;
+
+    timerId.current = setInterval(() => {
+      const remainingMs = endTime.current - Date.now();
+      const remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+      updateTime(remainingSeconds);
+
+      if (remainingSeconds <= 0) {
+        clearInterval(timerId.current);
+        timerId.current = null;
+        isRunning.current = false;
+        updateTime(0);
+
+        if (timeOutId.current !== null) return;
+        timeOutId.current = setTimeout(() => {
+          timeOutId.current = null;
           if (!pomodoroCountedRef.current) {
             onPomodoroComplete();
             pomodoroCountedRef.current = true;
           }
           switchMode();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => {
-      clearInterval(id);
-    };
-  }, [isRunning]);
-
-  useEffect(() => {
-    let state = {
-      endTime: isRunning ? endTime : null,
-      isBreak,
-      isRunning,
-      duration,
-      tomatoCount,
-      timeLeft,
-    };
-    localStorage.setItem("pomodoro", JSON.stringify(state));
-  }, [isRunning, timeLeft, tomatoCount, isBreak, duration, endTime]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("pomodoro");
-    if (saved) {
-      const state = JSON.parse(saved);
-      setEndTime(state.endTime);
-      setIsBreak(state.isBreak);
-      setIsRunning(state.isRunning);
-      setDuration(state.duration);
-      setTomatoCount(state.tomatoCount);
-      if (state.isBreak) {
-        if (state.tomatoCount < 3) {
-          setModeClass("is-break");
-          setTextContent("Пора сделать перерыв!");
-        } else {
-          setModeClass("is-long-break");
-          setTextContent("Пора сделать длинный перерыв!");
-        }
-      } else {
-        setModeClass("");
-        setTextContent("Пора за работу!");
+          saveState();
+        }, 1000);
       }
-      if (state.isRunning && state.endTime > Date.now()) {
-        let remainingSeconds = Math.floor((state.endTime - Date.now()) / 1000);
-        setTimeLeft(remainingSeconds);
-      } else if (
-        state.isRunning &&
-        state.endTime !== null &&
-        state.endTime <= Date.now()
-      ) {
-        if (!pomodoroCountedRef.current) {
-          onPomodoroComplete();
-          pomodoroCountedRef.current = true;
-        }
-        switchMode();
-      } else {
-        setTimeLeft(state.timeLeft);
-      }
+    }, 300);
+  }
+
+  // === Обработчики кнопок ===
+  function handleStart() {
+    if (pausedTimeLeft.current > 0) {
+      endTime.current = Date.now() + pausedTimeLeft.current * 1000;
+      pausedTimeLeft.current = null;
+    } else {
+      endTime.current = Date.now() + duration.current * 1000;
     }
+    isRunning.current = true;
+    saveState();
+    runTimer();
+  }
+
+  function handleStop() {
+    if (isRunning.current) {
+      const remainingMs = endTime.current - Date.now();
+      pausedTimeLeft.current = Math.ceil(remainingMs / 1000);
+      endTime.current = Date.now() + duration.current * 1000;
+    }
+    clearInterval(timerId.current);
+    timerId.current = null;
+    clearTimeout(timeOutId.current);
+    timeOutId.current = null;
+    isRunning.current = false;
+    saveState();
+  }
+
+  function handleReset() {
+    clearInterval(timerId.current);
+    timerId.current = null;
+    clearTimeout(timeOutId.current);
+    timeOutId.current = null;
+    isBreak.current = false;
+    isRunning.current = false;
+    duration.current = workTime;
+    tomatoCount.current = 0;
+    pausedTimeLeft.current = null;
+    updateTime(workTime);
+    document.body.classList.remove("is-break", "is-long-break");
+    setTextContent("Начнём?");
+    setModeClass("");
+    endTime.current = null;
+    pomodoroCountedRef.current = false;
+    saveState();
+  }
+
+  function handleSkip() {
+    clearInterval(timerId.current);
+    timerId.current = null;
+    clearTimeout(timeOutId.current);
+    timeOutId.current = null;
+    isRunning.current = false;
+    pausedTimeLeft.current = null;
+    switchMode();
+    saveState();
+  }
+
+  // Для управления текстом и классами из React (чтобы не трогать DOM напрямую)
+  const [modeClass, setModeClass] = useState("");
+  const [textContent, setTextContent] = useState("Начнём?");
+
+  useEffect(() => {
+    restoreState();
   }, []);
-  // Сохранение: эффект следит за [isRunning, timeLeft, tomatoCount, isBreak, duration, endTime]
-  // Восстановление: эффект с [] -> читаем localStorage -> сеттеры -> развилка:
-  //   - если isRunning && endTime > Date.now() -> setTimeLeft(остаток)
-  //   - если isRunning && endTime <= Date.now() -> switchMode()
-  //   - иначе -> setTimeLeft(state.timeLeft)
+
+  // Форматирование времени
+  function formatTime(secs) {
+    const minutes = Math.floor(secs / 60);
+    const seconds = secs % 60;
+    return `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+  }
+
+  useEffect(() => {
+    if (settingsVersion === 0) return; // пропускаем первый рендер
+    // Сброс таймера на новые настройки
+    clearInterval(timerId.current);
+    timerId.current = null;
+    clearTimeout(timeOutId.current);
+    timeOutId.current = null;
+    isRunning.current = false;
+    isBreak.current = false;
+    duration.current = workTime;
+    tomatoCount.current = 0;
+    pausedTimeLeft.current = null;
+    endTime.current = null;
+    pomodoroCountedRef.current = false;
+    updateTime(workTime);
+    setTextContent("Начнём?");
+    setModeClass("");
+    saveState();
+  }, [settingsVersion]);
   return (
     <section className="main">
       <img

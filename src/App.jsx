@@ -1,6 +1,6 @@
 import "./style.css";
 import HowItWorks from "./components/HowItWorks";
-import MainSection from "./components/MainSection";
+import MainSection from "./components/mainSection";
 import Advantages from "./components/Advantages";
 import Feedback from "./components/Feedback";
 import Footer from "./components/Footer";
@@ -14,6 +14,7 @@ function App() {
   const [longBreakTime, setLongBreakTime] = useState(20 * 60);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [completedTomatoes, setCompletedTomatoes] = useState([]);
+  const [settingsVersion, setSettingsVersion] = useState(0);
   useEffect(() => {
     if (completedTomatoes.length > 0) {
       localStorage.setItem(
@@ -50,6 +51,7 @@ function App() {
         breakTime={breakTime}
         longBreakTime={longBreakTime}
         onPomodoroComplete={handlePomodoroComplete}
+        settingsVersion={settingsVersion}
       />
       <Statistics data={completedTomatoes} />
       <HowItWorks />
@@ -64,6 +66,7 @@ function App() {
             setBreakTime(br);
             setLongBreakTime(long);
             setModalIsOpen(false);
+            setSettingsVersion((prev) => prev + 1);
           }}
         />
       )}
